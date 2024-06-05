@@ -687,6 +687,7 @@ class LlamaDecoderLayer(nn.Module):
         output_attentions: Optional[bool] = False,
         use_cache: Optional[bool] = False,
         cache_position: Optional[torch.LongTensor] = None,
+        type=''
     ) -> Tuple[torch.FloatTensor, Optional[Tuple[torch.FloatTensor, torch.FloatTensor]]]:
         """
         Args:
@@ -714,7 +715,7 @@ class LlamaDecoderLayer(nn.Module):
             past_key_value=past_key_value,
             output_attentions=output_attentions,
             use_cache=use_cache,
-            cache_position=cache_position,
+            cache_position=cache_position
         )
         hidden_states = residual + hidden_states
 
@@ -900,6 +901,7 @@ class LlamaModel(LlamaPreTrainedModel):
         output_hidden_states: Optional[bool] = None,
         return_dict: Optional[bool] = None,
         cache_position: Optional[torch.LongTensor] = None,
+        type=''
     ) -> Union[Tuple, BaseModelOutputWithPast]:
         output_attentions = output_attentions if output_attentions is not None else self.config.output_attentions
         output_hidden_states = (
@@ -971,6 +973,7 @@ class LlamaModel(LlamaPreTrainedModel):
                     output_attentions=output_attentions,
                     use_cache=use_cache,
                     cache_position=cache_position,
+                    type=type
                 )
 
             hidden_states = layer_outputs[0]
@@ -1126,6 +1129,7 @@ class LlamaForCausalLM(LlamaPreTrainedModel):
         output_hidden_states: Optional[bool] = None,
         return_dict: Optional[bool] = None,
         cache_position: Optional[torch.LongTensor] = None,
+        type = ''
     ) -> Union[Tuple, CausalLMOutputWithPast]:
         r"""
         Args:
@@ -1170,6 +1174,7 @@ class LlamaForCausalLM(LlamaPreTrainedModel):
             output_hidden_states=output_hidden_states,
             return_dict=return_dict,
             cache_position=cache_position,
+            type=type
         )
 
         hidden_states = outputs[0]
@@ -1216,6 +1221,7 @@ class LlamaForCausalLM(LlamaPreTrainedModel):
         use_cache=True,
         **kwargs,
     ):
+        #print(kwargs)
         past_length = 0
         if past_key_values is not None:
             if isinstance(past_key_values, Cache):

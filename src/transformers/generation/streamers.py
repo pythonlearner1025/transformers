@@ -94,7 +94,12 @@ class TextStreamer(BaseStreamer):
 
         # Add the new token to the cache and decodes the entire thing.
         self.token_cache.extend(value.tolist())
-        text = self.tokenizer.decode(self.token_cache, **self.decode_kwargs)
+        try:
+            text = self.tokenizer.decode(self.token_cache, **self.decode_kwargs)
+        except Exception as e:
+            print("bad id:")
+            print(value.tolist())
+            raise e
 
         # After the symbol for a new line, we flush the cache.
         if text.endswith("\n"):

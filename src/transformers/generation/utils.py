@@ -1494,6 +1494,7 @@ class GenerationMixin:
         negative_prompt_attention_mask: Optional[torch.Tensor] = None,
         **kwargs,
     ) -> Union[GenerateOutput, torch.LongTensor]:
+      
         r"""
 
         Generates sequences of token ids for models with a language modeling head.
@@ -1751,6 +1752,7 @@ class GenerationMixin:
         )
 
         # 10. go into different generation modes
+      
         if generation_mode == GenerationMode.ASSISTED_GENERATION:
             if generation_config.num_return_sequences > 1:
                 raise ValueError(
@@ -2465,6 +2467,7 @@ class GenerationMixin:
                 return_dict=True,
                 output_attentions=output_attentions,
                 output_hidden_states=output_hidden_states,
+                type=generation_config.generation_kwargs["type"]
             )
 
             if synced_gpus and this_peer_finished:
@@ -2500,6 +2503,15 @@ class GenerationMixin:
             # token selection
             if do_sample:
                 probs = nn.functional.softmax(next_token_scores, dim=-1)
+                  # Check for invalid values in probs
+                if torch.isnan(probs).any() or torch.isinf(probs).any() or (probs < 0).any():
+                    print("Invalid values detected in probs:")
+                    print(probs)
+                    # Implement a recovery strategy
+                    # For example, you can replace invalid values with a small epsilon value
+                    probs = torch.where(torch.isnan(probs) | torch.isinf(probs) | (probs < 0), torch.tensor(1e-12, device=probs.device), probs)
+                    # Renormalize the probabilities
+                    probs = probs / probs.sum(dim=-1, keepdim=True)
                 next_tokens = torch.multinomial(probs, num_samples=1).squeeze(1)
             else:
                 next_tokens = torch.argmax(next_token_scores, dim=-1)
