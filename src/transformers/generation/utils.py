@@ -2506,13 +2506,15 @@ class GenerationMixin:
                   # Check for invalid values in probs
                 if torch.isnan(probs).any() or torch.isinf(probs).any() or (probs < 0).any():
                     print("Invalid values detected in probs:")
-                    print(probs)
+                    print(next_token_logits.shape)
+                    print(next_token_logits)
                     # Implement a recovery strategy
                     # For example, you can replace invalid values with a small epsilon value
                     probs = torch.where(torch.isnan(probs) | torch.isinf(probs) | (probs < 0), torch.tensor(1e-12, device=probs.device), probs)
                     # Renormalize the probabilities
                     probs = probs / probs.sum(dim=-1, keepdim=True)
                 next_tokens = torch.multinomial(probs, num_samples=1).squeeze(1)
+                # Check for valid token IDs
             else:
                 next_tokens = torch.argmax(next_token_scores, dim=-1)
 
